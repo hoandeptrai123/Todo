@@ -22,10 +22,16 @@ db.serialize(() => {
     title TEXT NOT NULL,
     description TEXT,
     completed INTEGER DEFAULT 0,
+    deadline DATETIME,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id)
   )`);
+
+  // Add deadline column if it doesn't exist (for existing databases)
+  db.run(`ALTER TABLE todos ADD COLUMN deadline DATETIME`, (err) => {
+    // Ignore error if column already exists
+  });
 });
 
 module.exports = db;

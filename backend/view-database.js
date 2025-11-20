@@ -31,7 +31,7 @@ db.all('SELECT id, username, email, created_at FROM users', [], (err, rows) => {
   // View Todos
   console.log('\n📝 TODOS TABLE:');
   console.log('─'.repeat(80));
-  db.all('SELECT t.id, t.user_id, u.username, t.title, t.description, t.completed, t.created_at FROM todos t LEFT JOIN users u ON t.user_id = u.id ORDER BY t.created_at DESC', [], (err, rows) => {
+  db.all('SELECT t.id, t.user_id, u.username, t.title, t.description, t.completed, t.deadline, t.created_at FROM todos t LEFT JOIN users u ON t.user_id = u.id ORDER BY t.created_at DESC', [], (err, rows) => {
     if (err) {
       console.error('Error reading todos:', err);
     } else {
@@ -45,6 +45,7 @@ db.all('SELECT id, username, email, created_at FROM users', [], (err, rows) => {
           console.log(`  Title: ${row.title}`);
           console.log(`  Description: ${row.description || '(empty)'}`);
           console.log(`  Completed: ${row.completed === 1 ? '✅ Yes' : '❌ No'}`);
+          console.log(`  Deadline: ${row.deadline || '(not set)'}`);
           console.log(`  Created: ${row.created_at}`);
         });
       }

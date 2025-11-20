@@ -37,15 +37,15 @@ router.get('/:id', authenticateToken, (req, res) => {
 
 // Create todo
 router.post('/', authenticateToken, (req, res) => {
-  const { title, description } = req.body;
+  const { title, description, deadline } = req.body;
 
   if (!title) {
     return res.status(400).json({ error: 'Title is required' });
   }
 
   db.run(
-    'INSERT INTO todos (user_id, title, description) VALUES (?, ?, ?)',
-    [req.user.id, title, description || ''],
+    'INSERT INTO todos (user_id, title, description, deadline) VALUES (?, ?, ?, ?)',
+    [req.user.id, title, description || '', deadline || null],
     function(err) {
       if (err) {
         return res.status(500).json({ error: 'Failed to create todo' });
@@ -63,7 +63,7 @@ router.post('/', authenticateToken, (req, res) => {
 
 // Update todo
 router.put('/:id', authenticateToken, (req, res) => {
-  const { title, description, completed } = req.body;
+  const { title, description, completed, deadline } = req.body;
 
   db.get(
     'SELECT * FROM todos WHERE id = ? AND user_id = ?',
@@ -79,10 +79,11 @@ router.put('/:id', authenticateToken, (req, res) => {
       const updatedTitle = title !== undefined ? title : todo.title;
       const updatedDescription = description !== undefined ? description : todo.description;
       const updatedCompleted = completed !== undefined ? (completed ? 1 : 0) : todo.completed;
+      const updatedDeadline = deadline !== undefined ? (deadline || null) : todo.deadline;
 
       db.run(
-        'UPDATE todos SET title = ?, description = ?, completed = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND user_id = ?',
-        [updatedTitle, updatedDescription, updatedCompleted, req.params.id, req.user.id],
+        'UPDATE todos SET title = ?, description = ?, completed = ?, deadline = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ? AND user_id = ?',
+        [updatedTitle, updatedDescription, updatedCompleted, updatedDeadline, req.params.id, req.user.id],
         (err) => {
           if (err) {
             return res.status(500).json({ error: 'Failed to update todo' });

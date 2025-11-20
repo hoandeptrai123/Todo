@@ -9,6 +9,7 @@ const TodoApp = () => {
   const [todos, setTodos] = useState([]);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [deadline, setDeadline] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
@@ -46,12 +47,13 @@ const TodoApp = () => {
     try {
       const response = await axios.post(
         `${API_URL}/todos`,
-        { title, description },
+        { title, description, deadline: deadline || null },
         getAuthHeaders()
       );
       setTodos([response.data, ...todos]);
       setTitle('');
       setDescription('');
+      setDeadline('');
       setError('');
     } catch (error) {
       setError('Không thể thêm todo');
@@ -129,6 +131,13 @@ const TodoApp = () => {
                 rows="3"
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
+              <input
+                type="datetime-local"
+                placeholder="Deadline (tùy chọn)..."
+                value={deadline}
+                onChange={(e) => setDeadline(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              />
               <button
                 type="submit"
                 className="w-full px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition"
@@ -175,9 +184,30 @@ const TodoApp = () => {
                       {todo.description && (
                         <p className="text-sm text-gray-600 mt-1">{todo.description}</p>
                       )}
-                      <p className="text-xs text-gray-400 mt-2">
-                        {new Date(todo.created_at).toLocaleString('vi-VN')}
-                      </p>
+                      <div className="flex flex-wrap gap-3 mt-2">
+                        <p className="text-xs text-gray-400">
+                          Tạo: {new Date(todo.created_at).toLocaleString('vi-VN')}
+                        </p>
+                        {todo.deadline && (
+                          <p className={`text-xs font-medium ${
+                            todo.completed === 1 
+                              ? 'text-gray-400' 
+                              : new Date(todo.deadline) < new Date()
+                              ? 'text-red-600'
+                              : new Date(todo.deadline) <= new Date(Date.now() + 24 * 60 * 60 * 1000)
+                              ? 'text-orange-600'
+                              : 'text-green-600'
+                          }`}>
+                            ⏰ Deadline: {new Date(todo.deadline).toLocaleString('vi-VN')}
+                            {!todo.completed && new Date(todo.deadline) < new Date() && (
+                              <span className="ml-1 font-bold">(Quá hạn!)</span>
+                            )}
+                            {!todo.completed && new Date(todo.deadline) > new Date() && new Date(todo.deadline) <= new Date(Date.now() + 24 * 60 * 60 * 1000) && (
+                              <span className="ml-1 font-bold">(Sắp đến hạn!)</span>
+                            )}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </div>
                   <button
