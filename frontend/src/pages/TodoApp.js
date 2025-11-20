@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 
@@ -12,10 +12,6 @@ const TodoApp = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    fetchTodos();
-  }, []);
-
   const getAuthHeaders = () => {
     const token = localStorage.getItem('token');
     return {
@@ -25,7 +21,7 @@ const TodoApp = () => {
     };
   };
 
-  const fetchTodos = async () => {
+  const fetchTodos = useCallback(async () => {
     try {
       setLoading(true);
       const response = await axios.get(`${API_URL}/todos`, getAuthHeaders());
@@ -37,7 +33,11 @@ const TodoApp = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchTodos();
+  }, [fetchTodos]);
 
   const handleAddTodo = async (e) => {
     e.preventDefault();
